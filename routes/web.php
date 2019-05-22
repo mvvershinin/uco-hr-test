@@ -12,5 +12,12 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/contacts');
+})->name('index');
+
+Route::get('contacts', function () {
+    return view('contacts.index');
+});
+Route::group(['prefix' => 'ajax'], function () {
+    Route::get('contacts', 'Ajax\ContactController@getContacts')->name('ajax.contacts.get');
 });
