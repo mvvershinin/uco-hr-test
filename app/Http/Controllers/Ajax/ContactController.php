@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Ajax;
 
 use App\Contact;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use Illuminate\Support\Arr;
+
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Storage;
+
 define('TABLE_COLUMNS',['age',	'eyeColor',	'name', 'gender', 'company', 'email', 'phone', 'address']);
+define('JSON_PATH', 'json/data.json');
 
 class ContactController extends Controller
 {
@@ -17,10 +22,12 @@ class ContactController extends Controller
      */
     public function getContacts()
     {
-        $data = Contact::active()
-            ->select(TABLE_COLUMNS)
-            ->paginate(2);
+        $json = Storage::disk('public')->get(JSON_PATH);
+        $collect = collect(
+            Arr::flatten(json_decode($json, true),2)
+        );
+        $data = $collect->where('isActive', true)->mapInto( Contact::class);
 
-        return response(json_encode($data), 200);
+        return response(json_encode($data->simplePaginate(2)), 200);
     }
 }
